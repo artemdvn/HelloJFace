@@ -1,16 +1,9 @@
 package com.eclipsercp.swtjface;
 
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.StatusLineManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
@@ -26,7 +19,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -36,33 +28,27 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import com.eclipsercp.swtjface.actions.ActionFileOpen;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.stream.JsonReader;
+import com.eclipsercp.swtjface.actions.*;
 
 public class HelloJFace extends ApplicationWindow {
 
-	private List<Person> personList;
+	private List<Person> personList = new ArrayList<Person>();
 	private TableViewer viewer;
 	private Text personName;
 	private Text personGroup;
 	private Button swtDoneBtn;
 
-	private StatusLineManager slm = new StatusLineManager();
-	private StatusAction status_action = new StatusAction(slm);
-	private ActionContributionItem aci = new ActionContributionItem(status_action);
 	private ActionFileOpen actionFileOpen;
+	private ActionFileSave actionFileSave;
+	private ActionEditCopy actionEditCopy;
+	private ActionEditPaste actionEditPaste;
+	private ActionEditDelete actionEditDelete;
+	private ActionHelpAbout actionHelpAbout;
 
 	public HelloJFace() {
 		super(null);
-		addStatusLine();
 		addMenuBar();
 		addToolBar(SWT.FLAT | SWT.WRAP);
-
-		personList = new ArrayList<Person>();
-		personList.add(new Person("Alex", 1, true));
 	}
 
 	@Override
@@ -71,8 +57,7 @@ public class HelloJFace extends ApplicationWindow {
 		getShell().setText("JFace homework log");
 		parent.setSize(500, 500);
 		parent.setLayout(new GridLayout(1, true));
-		aci.fill(parent);
-
+		
 		SashForm sf = new SashForm(parent, SWT.HORIZONTAL);
 
 		// list of persons
@@ -115,6 +100,7 @@ public class HelloJFace extends ApplicationWindow {
 		viewer.getControl().setLayoutData(gridData);
 		
 		actionFileOpen.setViewer(viewer);
+		actionFileSave.setViewer(viewer);
 		
 	}
 
@@ -204,6 +190,9 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void savePerson(String nameString, String groupString, Boolean swtDone) {
+		
+		personList = getPersonListFromViewer();
+		
 		final Table table = viewer.getTable();
 		if (table.getSelectionIndex() == -1) {
 			// no item is selected
@@ -244,6 +233,9 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void deletePerson() {
+		
+		personList = getPersonListFromViewer();
+		
 		final Table table = viewer.getTable();
 		if (table.getSelectionIndex() == -1) {
 			// no item is selected
@@ -271,6 +263,11 @@ public class HelloJFace extends ApplicationWindow {
 			System.exit(0);
 		}
 
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<Person> getPersonListFromViewer() {
+		return (List<Person>) viewer.getInput();
 	}
 
 	// create the columns for the table
@@ -321,7 +318,6 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void checkDigitalInput(Event e) {
-
 		String string = e.text;
 		char[] chars = new char[string.length()];
 		string.getChars(0, chars.length, chars, 0);
@@ -330,32 +326,17 @@ public class HelloJFace extends ApplicationWindow {
 				e.doit = false;
 			}
 		}
-
-	}
-
-	public static void main(String[] args) {
-
-		HelloJFace awin = new HelloJFace();
-		awin.setBlockOnOpen(true);		
-		awin.open();
-		
-		Display.getCurrent().dispose();
 	}
 
 	@Override
 	protected MenuManager createMenuManager() {
 		
-		// Action: open a file.
 		actionFileOpen = new ActionFileOpen();
-		actionFileOpen.setAccelerator(SWT.CTRL + 'O');
-				
-		// Action: save the text to a file.
-		Action actionSave = new Action("&Save\tCtrl+S") {
-			public void run() {
-				saveListToFile();
-			}
-		};
-		actionSave.setAccelerator(SWT.CTRL + 'S');
+		actionFileSave = new ActionFileSave();
+		actionEditCopy = new ActionEditCopy();
+		actionEditPaste = new ActionEditPaste();
+		actionEditDelete = new ActionEditDelete();
+		actionHelpAbout = new ActionHelpAbout();
 		
 		// Add menus.
 	    MenuManager barMenuManager = new MenuManager();
@@ -369,68 +350,36 @@ public class HelloJFace extends ApplicationWindow {
 	    barMenuManager.add(helpMenuManager);
 	    
 	    fileMenuManager.add(actionFileOpen);
-	    fileMenuManager.add(actionSave);
+	    fileMenuManager.add(actionFileSave);
 	    
-//		MenuManager main_menu = new MenuManager(null);
-//		MenuManager action_menu = new MenuManager("File");
-//		main_menu.add(action_menu);
-//		action_menu.add(status_action);
+	    editMenuManager.add(actionEditCopy);
+	    editMenuManager.add(actionEditPaste);
+	    editMenuManager.add(actionEditDelete);
 	    
-		return barMenuManager;
+	    helpMenuManager.add(actionHelpAbout);
+	    
+	    return barMenuManager;
+	    
 	}
 
 	@Override
 	protected ToolBarManager createToolBarManager(int style) {
 		ToolBarManager tool_bar_manager = new ToolBarManager(style);
-		tool_bar_manager.add(status_action);
+		tool_bar_manager.add(actionFileOpen);
+		tool_bar_manager.add(actionFileSave);
+		tool_bar_manager.add(actionEditCopy);
+		tool_bar_manager.add(actionEditPaste);
+		tool_bar_manager.add(actionEditDelete);
 		return tool_bar_manager;
 	}
 
-	@Override
-	protected StatusLineManager createStatusLineManager() {
-		return slm;
-	}
+	public static void main(String[] args) {
+
+		HelloJFace awin = new HelloJFace();
+		awin.setBlockOnOpen(true);		
+		awin.open();
+		
+		Display.getCurrent().dispose();
+	}	
 	
-	private void loadListFromFile() {
-
-		FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
-		dialog.setFilterExtensions(new String[] { "*.json" });
-		String selectedFile = dialog.open();
-		if (selectedFile == null) {
-			return;
-		}
-		
-		Gson gson = new Gson();
-
-		try (FileReader file = new FileReader(selectedFile)) {
-			Type listOfTestObject = new TypeToken<List<Person>>(){}.getType();
-			personList = gson.fromJson(file, listOfTestObject);
-			viewer.refresh();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
-	
-	
-	private void saveListToFile() {
-		
-		FileDialog dialog = new FileDialog(getShell(), SWT.SAVE);
-		dialog.setFilterExtensions(new String[] {"*.json"});
-		String fullName = dialog.open();
-		
-		if (fullName != null){
-			
-			try (FileWriter file = new FileWriter(fullName)) {
-				Gson gson = new GsonBuilder().create();
-			    gson.toJson(personList, file);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-	}
-
 }
