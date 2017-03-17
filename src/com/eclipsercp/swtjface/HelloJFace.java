@@ -1,8 +1,13 @@
 package com.eclipsercp.swtjface;
 
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.StatusLineManager;
@@ -21,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
@@ -29,6 +35,12 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+
+import com.eclipsercp.swtjface.actions.ActionFileOpen;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 
 public class HelloJFace extends ApplicationWindow {
 
@@ -41,6 +53,7 @@ public class HelloJFace extends ApplicationWindow {
 	private StatusLineManager slm = new StatusLineManager();
 	private StatusAction status_action = new StatusAction(slm);
 	private ActionContributionItem aci = new ActionContributionItem(status_action);
+	private ActionFileOpen actionFileOpen;
 
 	public HelloJFace() {
 		super(null);
@@ -100,6 +113,9 @@ public class HelloJFace extends ApplicationWindow {
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
 		viewer.getControl().setLayoutData(gridData);
+		
+		actionFileOpen.setViewer(viewer);
+		
 	}
 
 	private void createPersonInfo(Composite parent) {
@@ -234,7 +250,7 @@ public class HelloJFace extends ApplicationWindow {
 			return;
 		}
 
-		MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+		MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 		messageBox.setMessage("Do you really want to delete current item?");
 		messageBox.setText("Delete item");
 		int response = messageBox.open();
@@ -246,7 +262,7 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void cancelApp() {
-
+		
 		MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 		messageBox.setMessage("Do you really want to exit?");
 		messageBox.setText("Exiting Application");
@@ -328,11 +344,39 @@ public class HelloJFace extends ApplicationWindow {
 
 	@Override
 	protected MenuManager createMenuManager() {
-		MenuManager main_menu = new MenuManager(null);
-		MenuManager action_menu = new MenuManager("Menu");
-		main_menu.add(action_menu);
-		action_menu.add(status_action);
-		return main_menu;
+		
+		// Action: open a file.
+		actionFileOpen = new ActionFileOpen();
+		actionFileOpen.setAccelerator(SWT.CTRL + 'O');
+				
+		// Action: save the text to a file.
+		Action actionSave = new Action("&Save\tCtrl+S") {
+			public void run() {
+				saveListToFile();
+			}
+		};
+		actionSave.setAccelerator(SWT.CTRL + 'S');
+		
+		// Add menus.
+	    MenuManager barMenuManager = new MenuManager();
+	    
+	    MenuManager fileMenuManager = new MenuManager("&File");
+	    MenuManager editMenuManager = new MenuManager("&Edit");
+	    MenuManager helpMenuManager = new MenuManager("&Help");
+	    
+	    barMenuManager.add(fileMenuManager);
+	    barMenuManager.add(editMenuManager);
+	    barMenuManager.add(helpMenuManager);
+	    
+	    fileMenuManager.add(actionFileOpen);
+	    fileMenuManager.add(actionSave);
+	    
+//		MenuManager main_menu = new MenuManager(null);
+//		MenuManager action_menu = new MenuManager("File");
+//		main_menu.add(action_menu);
+//		action_menu.add(status_action);
+	    
+		return barMenuManager;
 	}
 
 	@Override
@@ -345,6 +389,48 @@ public class HelloJFace extends ApplicationWindow {
 	@Override
 	protected StatusLineManager createStatusLineManager() {
 		return slm;
+	}
+	
+	private void loadListFromFile() {
+
+		FileDialog dialog = new FileDialog(getShell(), SWT.OPEN);
+		dialog.setFilterExtensions(new String[] { "*.json" });
+		String selectedFile = dialog.open();
+		if (selectedFile == null) {
+			return;
+		}
+		
+		Gson gson = new Gson();
+
+		try (FileReader file = new FileReader(selectedFile)) {
+			Type listOfTestObject = new TypeToken<List<Person>>(){}.getType();
+			personList = gson.fromJson(file, listOfTestObject);
+			viewer.refresh();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	
+	private void saveListToFile() {
+		
+		FileDialog dialog = new FileDialog(getShell(), SWT.SAVE);
+		dialog.setFilterExtensions(new String[] {"*.json"});
+		String fullName = dialog.open();
+		
+		if (fullName != null){
+			
+			try (FileWriter file = new FileWriter(fullName)) {
+				Gson gson = new GsonBuilder().create();
+			    gson.toJson(personList, file);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 	}
 
 }

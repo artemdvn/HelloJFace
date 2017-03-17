@@ -2,7 +2,8 @@ package com.eclipsercp.swtjface;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.StatusLineManager;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.FileDialog;
 
 public class StatusAction extends Action {
 	StatusLineManager statman;
@@ -18,6 +19,6 @@ public class StatusAction extends Action {
 	@Override
 	public void run() {
 		triggercount++;
-		statman.setMessage("The status action has fired. Count: " + triggercount);
+		statman.setMessage("The status action has fired. Count: " + triggercount);		
 	}
 }
