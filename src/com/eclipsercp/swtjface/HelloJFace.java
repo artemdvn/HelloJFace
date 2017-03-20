@@ -34,11 +34,11 @@ import com.eclipsercp.swtjface.actions.ActionFileOpen;
 import com.eclipsercp.swtjface.actions.ActionFileSave;
 import com.eclipsercp.swtjface.actions.ActionHelpAbout;
 import com.eclipsercp.swtjface.listeners.PersonTableSelectionListener;
+import com.eclipsercp.swtjface.services.MessageBoxService;
 import com.eclipsercp.swtjface.services.PersonService;
 
 public class HelloJFace extends ApplicationWindow {
 
-	private PersonService personService = PersonService.getInstance();
 	private TableViewer viewer;
 	private Text personName;
 	private Text personGroup;
@@ -100,7 +100,7 @@ public class HelloJFace extends ApplicationWindow {
 		viewer.addSelectionChangedListener(ptsl);
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(personService.getPersonList());
+		viewer.setInput(PersonService.getInstance().getPersonList());
 
 		// define layout for the viewer
 		GridData gridData = new GridData();
@@ -113,7 +113,7 @@ public class HelloJFace extends ApplicationWindow {
 		actionFileOpen.setViewer(viewer);
 		actionFileSave.setViewer(viewer);
 		ptsl.setViewer(viewer);
-		personService.setViewer(viewer);
+		PersonService.getInstance().setViewer(viewer);
 
 	}
 
@@ -161,19 +161,19 @@ public class HelloJFace extends ApplicationWindow {
 		// button 'New'
 		Button newBtn = new Button(personButtons, SWT.PUSH);
 		newBtn.setText("New");
-		newBtn.addListener(SWT.Selection,
-				event -> personService.addPerson(personName.getText(), personGroup.getText(), swtDoneBtn.getSelection()));
+		newBtn.addListener(SWT.Selection, event -> PersonService.getInstance().addPerson(personName.getText(),
+				personGroup.getText(), swtDoneBtn.getSelection()));
 
 		// button 'Save'
 		Button saveBtn = new Button(personButtons, SWT.PUSH);
 		saveBtn.setText("Save");
-		saveBtn.addListener(SWT.Selection,
-				event -> personService.savePerson(personName.getText(), personGroup.getText(), swtDoneBtn.getSelection()));
+		saveBtn.addListener(SWT.Selection, event -> PersonService.getInstance().savePerson(personName.getText(),
+				personGroup.getText(), swtDoneBtn.getSelection()));
 
 		// button 'Delete'
 		Button deleteBtn = new Button(personButtons, SWT.PUSH);
 		deleteBtn.setText("Delete");
-		deleteBtn.addListener(SWT.Selection, event -> personService.deletePerson());
+		deleteBtn.addListener(SWT.Selection, event -> PersonService.getInstance().deletePerson());
 
 		// button 'Cancel'
 		Button cancelBtn = new Button(personButtons, SWT.PUSH);
@@ -181,7 +181,7 @@ public class HelloJFace extends ApplicationWindow {
 		cancelBtn.addListener(SWT.Selection, event -> cancelApp());
 
 		personInfoGroup.pack();
-		
+
 		ptsl.setPersonName(personName);
 		ptsl.setPersonGroup(personGroup);
 		ptsl.setSwtDoneBtn(swtDoneBtn);
@@ -189,13 +189,11 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void cancelApp() {
-
-		MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		messageBox.setMessage("Do you really want to exit?");
-		messageBox.setText("Exiting Application");
+		MessageBox messageBox = MessageBoxService.getInstance().getMessageBox(SWT.ICON_QUESTION | SWT.YES | SWT.NO,
+				"Exiting Application", "Do you really want to exit?");
 		int response = messageBox.open();
 		if (response == SWT.YES) {
-			System.exit(0);
+			close();
 		}
 
 	}

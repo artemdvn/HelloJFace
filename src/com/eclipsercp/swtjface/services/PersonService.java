@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;
 
 import com.eclipsercp.swtjface.Person;
@@ -41,9 +40,8 @@ public class PersonService {
 
 	public void addPerson(String nameString, String groupString, Boolean swtDone) {
 		if (nameString.length() == 0) {
-			MessageBox dia = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
-			dia.setText("Empty name");
-			dia.setMessage("The name of new person cannot be empty!");
+			MessageBox dia = MessageBoxService.getInstance().getMessageBox(SWT.ICON_INFORMATION | SWT.OK, "Empty name",
+					"The name of new person cannot be empty!");
 			dia.open();
 			return;
 		}
@@ -72,18 +70,16 @@ public class PersonService {
 			return;
 		}
 
-		MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		messageBox.setMessage("Do you really want to save changes of the current item?");
-		messageBox.setText("Save item");
+		MessageBox messageBox = MessageBoxService.getInstance().getMessageBox(SWT.ICON_QUESTION | SWT.YES | SWT.NO,
+				"Save item", "Do you really want to save changes of the current item?");
 		int response = messageBox.open();
 		if (response == SWT.NO) {
 			return;
 		}
 
 		if (nameString.length() == 0) {
-			MessageBox dia = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_INFORMATION | SWT.OK);
-			dia.setText("Empty name");
-			dia.setMessage("The name of the person cannot be empty!");
+			MessageBox dia = MessageBoxService.getInstance().getMessageBox(SWT.ICON_INFORMATION | SWT.OK, "Empty name",
+					"The name of the person cannot be empty!");
 			dia.open();
 			return;
 		}
@@ -114,10 +110,8 @@ public class PersonService {
 			return;
 		}
 
-		MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(),
-				SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		messageBox.setMessage("Do you really want to delete current item?");
-		messageBox.setText("Delete item");
+		MessageBox messageBox = MessageBoxService.getInstance().getMessageBox(SWT.ICON_QUESTION | SWT.YES | SWT.NO,
+				"Delete item", "Do you really want to delete current item?");
 		int response = messageBox.open();
 		if (response == SWT.YES) {
 			personList.remove(viewer.getTable().getSelectionIndex());
