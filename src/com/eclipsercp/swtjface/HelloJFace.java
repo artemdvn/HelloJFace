@@ -1,8 +1,5 @@
 package com.eclipsercp.swtjface;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -37,10 +34,11 @@ import com.eclipsercp.swtjface.actions.ActionFileOpen;
 import com.eclipsercp.swtjface.actions.ActionFileSave;
 import com.eclipsercp.swtjface.actions.ActionHelpAbout;
 import com.eclipsercp.swtjface.listeners.PersonTableSelectionListener;
+import com.eclipsercp.swtjface.services.PersonService;
 
 public class HelloJFace extends ApplicationWindow {
 
-	private List<Person> personList = new ArrayList<Person>();
+	private PersonService personService = PersonService.getInstance();
 	private TableViewer viewer;
 	private Text personName;
 	private Text personGroup;
@@ -102,7 +100,7 @@ public class HelloJFace extends ApplicationWindow {
 		viewer.addSelectionChangedListener(ptsl);
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(personList);
+		viewer.setInput(personService.getPersonList());
 
 		// define layout for the viewer
 		GridData gridData = new GridData();
@@ -115,6 +113,7 @@ public class HelloJFace extends ApplicationWindow {
 		actionFileOpen.setViewer(viewer);
 		actionFileSave.setViewer(viewer);
 		ptsl.setViewer(viewer);
+		personService.setViewer(viewer);
 
 	}
 
@@ -163,18 +162,18 @@ public class HelloJFace extends ApplicationWindow {
 		Button newBtn = new Button(personButtons, SWT.PUSH);
 		newBtn.setText("New");
 		newBtn.addListener(SWT.Selection,
-				event -> addPerson(personName.getText(), personGroup.getText(), swtDoneBtn.getSelection()));
+				event -> personService.addPerson(personName.getText(), personGroup.getText(), swtDoneBtn.getSelection()));
 
 		// button 'Save'
 		Button saveBtn = new Button(personButtons, SWT.PUSH);
 		saveBtn.setText("Save");
 		saveBtn.addListener(SWT.Selection,
-				event -> savePerson(personName.getText(), personGroup.getText(), swtDoneBtn.getSelection()));
+				event -> personService.savePerson(personName.getText(), personGroup.getText(), swtDoneBtn.getSelection()));
 
 		// button 'Delete'
 		Button deleteBtn = new Button(personButtons, SWT.PUSH);
 		deleteBtn.setText("Delete");
-		deleteBtn.addListener(SWT.Selection, event -> deletePerson());
+		deleteBtn.addListener(SWT.Selection, event -> personService.deletePerson());
 
 		// button 'Cancel'
 		Button cancelBtn = new Button(personButtons, SWT.PUSH);
@@ -189,93 +188,6 @@ public class HelloJFace extends ApplicationWindow {
 
 	}
 
-	private void addPerson(String nameString, String groupString, Boolean swtDone) {
-		if (nameString.length() == 0) {
-			MessageBox dia = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
-			dia.setText("Empty name");
-			dia.setMessage("The name of new person cannot be empty!");
-			dia.open();
-			return;
-		}
-
-		Integer group = 0;
-		if (groupString.length() > 0) {
-			try {
-				group = Integer.parseInt(groupString);
-			} catch (NumberFormatException e) {
-			}
-		}
-
-		Person newPerson = new Person(nameString, group, swtDone);
-		personList.add(newPerson);
-
-		viewer.refresh();
-
-	}
-
-	private void savePerson(String nameString, String groupString, Boolean swtDone) {
-
-		personList = getPersonListFromViewer();
-
-		if (viewer.getTable().getSelectionIndex() == -1) {
-			// no item is selected
-			return;
-		}
-
-		MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		messageBox.setMessage("Do you really want to save changes of the current item?");
-		messageBox.setText("Save item");
-		int response = messageBox.open();
-		if (response == SWT.NO) {
-			return;
-		}
-
-		if (nameString.length() == 0) {
-			MessageBox dia = new MessageBox(getShell(), SWT.ICON_INFORMATION | SWT.OK);
-			dia.setText("Empty name");
-			dia.setMessage("The name of the person cannot be empty!");
-			dia.open();
-			return;
-		}
-
-		Integer group = 0;
-		if (groupString.length() > 0) {
-			try {
-				group = Integer.parseInt(groupString);
-			} catch (NumberFormatException e) {
-			}
-		}
-
-		Person currentPerson = personList.get(viewer.getTable().getSelectionIndex());
-		currentPerson.setName(nameString);
-		currentPerson.setGroup(group);
-		currentPerson.setSwtDone(swtDone);
-
-		viewer.refresh();
-
-	}
-
-	private void deletePerson() {
-
-		personList = getPersonListFromViewer();
-
-		if (viewer.getTable().getSelectionIndex() == -1) {
-			// no item is selected
-			return;
-		}
-
-		MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(),
-				SWT.ICON_QUESTION | SWT.YES | SWT.NO);
-		messageBox.setMessage("Do you really want to delete current item?");
-		messageBox.setText("Delete item");
-		int response = messageBox.open();
-		if (response == SWT.YES) {
-			personList.remove(viewer.getTable().getSelectionIndex());
-			viewer.refresh();
-		}
-
-	}
-
 	private void cancelApp() {
 
 		MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
@@ -286,11 +198,6 @@ public class HelloJFace extends ApplicationWindow {
 			System.exit(0);
 		}
 
-	}
-
-	@SuppressWarnings("unchecked")
-	private List<Person> getPersonListFromViewer() {
-		return (List<Person>) viewer.getInput();
 	}
 
 	// create the columns for the table
