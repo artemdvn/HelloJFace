@@ -5,6 +5,10 @@ import java.util.List;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.resource.LocalResourceManager;
+import org.eclipse.jface.resource.ResourceManager;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.jface.viewers.TableViewer;
@@ -12,6 +16,7 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -23,12 +28,16 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
-import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
-import com.eclipsercp.swtjface.actions.*;
+import com.eclipsercp.swtjface.actions.ActionEditCopy;
+import com.eclipsercp.swtjface.actions.ActionEditDelete;
+import com.eclipsercp.swtjface.actions.ActionEditPaste;
+import com.eclipsercp.swtjface.actions.ActionFileOpen;
+import com.eclipsercp.swtjface.actions.ActionFileSave;
+import com.eclipsercp.swtjface.actions.ActionHelpAbout;
 
 public class HelloJFace extends ApplicationWindow {
 
@@ -45,6 +54,13 @@ public class HelloJFace extends ApplicationWindow {
 	private ActionEditDelete actionEditDelete;
 	private ActionHelpAbout actionHelpAbout;
 
+	// images for "SWT done" column assumes that we have these two icons in the
+	private final ImageDescriptor CHECKED = getImageDescriptor("checked.gif");
+	private final ImageDescriptor UNCHECKED = getImageDescriptor("unchecked.gif");
+
+	/**
+	 * Constructs a new instance of this class.
+	 */
 	public HelloJFace() {
 		super(null);
 		addMenuBar();
@@ -57,7 +73,7 @@ public class HelloJFace extends ApplicationWindow {
 		getShell().setText("JFace homework log");
 		parent.setSize(500, 500);
 		parent.setLayout(new GridLayout(1, true));
-		
+
 		SashForm sf = new SashForm(parent, SWT.HORIZONTAL);
 
 		// list of persons
@@ -70,17 +86,22 @@ public class HelloJFace extends ApplicationWindow {
 		return parent;
 	}
 
+	/**
+	 * Constructs a person list table.
+	 * 
+	 * @param parent
+	 *            a widget which will be the parent of the creating elements
+	 */
 	private void createListOfPersons(Composite parent) {
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createColumns(parent, viewer);
 
 		// make lines and header visible
-		final Table table = viewer.getTable();
-		table.setHeaderVisible(true);
-		table.setLinesVisible(true);
-		table.addListener(SWT.Selection, new Listener() {
+		viewer.getTable().setHeaderVisible(true);
+		viewer.getTable().setLinesVisible(true);
+		viewer.getTable().addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				TableItem currentItem = table.getItem(table.getSelectionIndex());
+				TableItem currentItem = viewer.getTable().getItem(viewer.getTable().getSelectionIndex());
 				personName.setText(currentItem.getText(0));
 				personGroup.setText(currentItem.getText(1));
 				swtDoneBtn.setSelection(Boolean.parseBoolean(currentItem.getText(2)));
@@ -93,17 +114,22 @@ public class HelloJFace extends ApplicationWindow {
 		// define layout for the viewer
 		GridData gridData = new GridData();
 		gridData.verticalAlignment = GridData.FILL;
-		// gridData.horizontalSpan = 2;
 		gridData.grabExcessHorizontalSpace = true;
 		gridData.grabExcessVerticalSpace = true;
 		gridData.horizontalAlignment = GridData.FILL;
 		viewer.getControl().setLayoutData(gridData);
-		
+
 		actionFileOpen.setViewer(viewer);
 		actionFileSave.setViewer(viewer);
-		
+
 	}
 
+	/**
+	 * Constructs a "Person info" group with fields and buttons.
+	 * 
+	 * @param parent
+	 *            a widget which will be the parent of the creating elements
+	 */
 	private void createPersonInfo(Composite parent) {
 		GridData gridDataResult = new GridData();
 		gridDataResult.horizontalAlignment = GridData.FILL;
@@ -190,11 +216,10 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void savePerson(String nameString, String groupString, Boolean swtDone) {
-		
+
 		personList = getPersonListFromViewer();
-		
-		final Table table = viewer.getTable();
-		if (table.getSelectionIndex() == -1) {
+
+		if (viewer.getTable().getSelectionIndex() == -1) {
 			// no item is selected
 			return;
 		}
@@ -223,7 +248,7 @@ public class HelloJFace extends ApplicationWindow {
 			}
 		}
 
-		Person currentPerson = personList.get(table.getSelectionIndex());
+		Person currentPerson = personList.get(viewer.getTable().getSelectionIndex());
 		currentPerson.setName(nameString);
 		currentPerson.setGroup(group);
 		currentPerson.setSwtDone(swtDone);
@@ -233,28 +258,28 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void deletePerson() {
-		
+
 		personList = getPersonListFromViewer();
-		
-		final Table table = viewer.getTable();
-		if (table.getSelectionIndex() == -1) {
+
+		if (viewer.getTable().getSelectionIndex() == -1) {
 			// no item is selected
 			return;
 		}
 
-		MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+		MessageBox messageBox = new MessageBox(Display.getDefault().getActiveShell(),
+				SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 		messageBox.setMessage("Do you really want to delete current item?");
 		messageBox.setText("Delete item");
 		int response = messageBox.open();
 		if (response == SWT.YES) {
-			personList.remove(table.getSelectionIndex());
+			personList.remove(viewer.getTable().getSelectionIndex());
 			viewer.refresh();
 		}
 
 	}
 
 	private void cancelApp() {
-		
+
 		MessageBox messageBox = new MessageBox(getShell(), SWT.ICON_QUESTION | SWT.YES | SWT.NO);
 		messageBox.setMessage("Do you really want to exit?");
 		messageBox.setText("Exiting Application");
@@ -264,7 +289,7 @@ public class HelloJFace extends ApplicationWindow {
 		}
 
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private List<Person> getPersonListFromViewer() {
 		return (List<Person>) viewer.getInput();
@@ -298,10 +323,27 @@ public class HelloJFace extends ApplicationWindow {
 		// SWT done
 		col = createTableViewerColumn(titles[2], bounds[2]);
 		col.setLabelProvider(new ColumnLabelProvider() {
+			private ResourceManager resourceManager = new LocalResourceManager(JFaceResources.getResources());
+
 			@Override
 			public String getText(Object element) {
 				Person p = (Person) element;
 				return p.isSwtDone().toString();
+			}
+
+			@Override
+			public Image getImage(Object element) {
+				Person p = (Person) element;
+				if (p.isSwtDone()) {
+					return resourceManager.createImage(CHECKED);
+				}
+				return resourceManager.createImage(UNCHECKED);
+			}
+
+			@Override
+			public void dispose() {
+				super.dispose();
+				resourceManager.dispose();
 			}
 		});
 
@@ -327,39 +369,49 @@ public class HelloJFace extends ApplicationWindow {
 			}
 		}
 	}
+	@Override
+	public boolean close(){
+		viewer.removeSelectionChangedListener(null);
+		return super.close();
+	}
 
 	@Override
 	protected MenuManager createMenuManager() {
-		
+
+		createActions();
+		return createAndFillMenu();
+
+	}
+
+	private void createActions() {
 		actionFileOpen = new ActionFileOpen();
 		actionFileSave = new ActionFileSave();
 		actionEditCopy = new ActionEditCopy();
 		actionEditPaste = new ActionEditPaste();
 		actionEditDelete = new ActionEditDelete();
 		actionHelpAbout = new ActionHelpAbout();
-		
-		// Add menus.
-	    MenuManager barMenuManager = new MenuManager();
-	    
-	    MenuManager fileMenuManager = new MenuManager("&File");
-	    MenuManager editMenuManager = new MenuManager("&Edit");
-	    MenuManager helpMenuManager = new MenuManager("&Help");
-	    
-	    barMenuManager.add(fileMenuManager);
-	    barMenuManager.add(editMenuManager);
-	    barMenuManager.add(helpMenuManager);
-	    
-	    fileMenuManager.add(actionFileOpen);
-	    fileMenuManager.add(actionFileSave);
-	    
-	    editMenuManager.add(actionEditCopy);
-	    editMenuManager.add(actionEditPaste);
-	    editMenuManager.add(actionEditDelete);
-	    
-	    helpMenuManager.add(actionHelpAbout);
-	    
-	    return barMenuManager;
-	    
+	}
+
+	private MenuManager createAndFillMenu() {
+		MenuManager barMenuManager = new MenuManager();
+
+		MenuManager fileMenuManager = new MenuManager("&File");
+		MenuManager editMenuManager = new MenuManager("&Edit");
+		MenuManager helpMenuManager = new MenuManager("&Help");
+
+		barMenuManager.add(fileMenuManager);
+		barMenuManager.add(editMenuManager);
+		barMenuManager.add(helpMenuManager);
+
+		fileMenuManager.add(actionFileOpen);
+		fileMenuManager.add(actionFileSave);
+
+		editMenuManager.add(actionEditCopy);
+		editMenuManager.add(actionEditPaste);
+		editMenuManager.add(actionEditDelete);
+
+		helpMenuManager.add(actionHelpAbout);
+		return barMenuManager;
 	}
 
 	@Override
@@ -373,13 +425,17 @@ public class HelloJFace extends ApplicationWindow {
 		return tool_bar_manager;
 	}
 
+	private static ImageDescriptor getImageDescriptor(String file) {
+		return ImageDescriptor.createFromFile(null, "resources/" + file);
+	}
+
 	public static void main(String[] args) {
 
 		HelloJFace awin = new HelloJFace();
-		awin.setBlockOnOpen(true);		
+		awin.setBlockOnOpen(true);
 		awin.open();
-		
+
 		Display.getCurrent().dispose();
-	}	
-	
+	}
+
 }
