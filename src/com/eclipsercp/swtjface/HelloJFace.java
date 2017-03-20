@@ -325,6 +325,9 @@ public class HelloJFace extends ApplicationWindow {
 		tool_bar_manager.add(actionEditCopy);
 		tool_bar_manager.add(actionEditPaste);
 		tool_bar_manager.add(actionEditDelete);
+		
+		ptsl.setToolBarManager(tool_bar_manager);
+		
 		return tool_bar_manager;
 	}
 
