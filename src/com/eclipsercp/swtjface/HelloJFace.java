@@ -26,10 +26,8 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import com.eclipsercp.swtjface.actions.ActionEditCopy;
@@ -38,6 +36,7 @@ import com.eclipsercp.swtjface.actions.ActionEditPaste;
 import com.eclipsercp.swtjface.actions.ActionFileOpen;
 import com.eclipsercp.swtjface.actions.ActionFileSave;
 import com.eclipsercp.swtjface.actions.ActionHelpAbout;
+import com.eclipsercp.swtjface.listeners.PersonTableSelectionListener;
 
 public class HelloJFace extends ApplicationWindow {
 
@@ -53,6 +52,7 @@ public class HelloJFace extends ApplicationWindow {
 	private ActionEditPaste actionEditPaste;
 	private ActionEditDelete actionEditDelete;
 	private ActionHelpAbout actionHelpAbout;
+	private PersonTableSelectionListener ptsl = new PersonTableSelectionListener();
 
 	// images for "SWT done" column assumes that we have these two icons in the
 	private final ImageDescriptor CHECKED = getImageDescriptor("checked.gif");
@@ -77,10 +77,10 @@ public class HelloJFace extends ApplicationWindow {
 		SashForm sf = new SashForm(parent, SWT.HORIZONTAL);
 
 		// list of persons
-		createListOfPersons(sf);
+		createTableViewer(sf);
 
 		// person info
-		createPersonInfo(sf);
+		createGroupOfFieldsAndButtons(sf);
 
 		parent.pack();
 		return parent;
@@ -92,21 +92,14 @@ public class HelloJFace extends ApplicationWindow {
 	 * @param parent
 	 *            a widget which will be the parent of the creating elements
 	 */
-	private void createListOfPersons(Composite parent) {
+	private void createTableViewer(Composite parent) {
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createColumns(parent, viewer);
 
 		// make lines and header visible
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
-		viewer.getTable().addListener(SWT.Selection, new Listener() {
-			public void handleEvent(Event event) {
-				TableItem currentItem = viewer.getTable().getItem(viewer.getTable().getSelectionIndex());
-				personName.setText(currentItem.getText(0));
-				personGroup.setText(currentItem.getText(1));
-				swtDoneBtn.setSelection(Boolean.parseBoolean(currentItem.getText(2)));
-			}
-		});
+		viewer.addSelectionChangedListener(ptsl);
 
 		viewer.setContentProvider(new ArrayContentProvider());
 		viewer.setInput(personList);
@@ -121,6 +114,7 @@ public class HelloJFace extends ApplicationWindow {
 
 		actionFileOpen.setViewer(viewer);
 		actionFileSave.setViewer(viewer);
+		ptsl.setViewer(viewer);
 
 	}
 
@@ -130,7 +124,7 @@ public class HelloJFace extends ApplicationWindow {
 	 * @param parent
 	 *            a widget which will be the parent of the creating elements
 	 */
-	private void createPersonInfo(Composite parent) {
+	private void createGroupOfFieldsAndButtons(Composite parent) {
 		GridData gridDataResult = new GridData();
 		gridDataResult.horizontalAlignment = GridData.FILL;
 
@@ -188,6 +182,10 @@ public class HelloJFace extends ApplicationWindow {
 		cancelBtn.addListener(SWT.Selection, event -> cancelApp());
 
 		personInfoGroup.pack();
+		
+		ptsl.setPersonName(personName);
+		ptsl.setPersonGroup(personGroup);
+		ptsl.setSwtDoneBtn(swtDoneBtn);
 
 	}
 
@@ -371,7 +369,7 @@ public class HelloJFace extends ApplicationWindow {
 	}
 	@Override
 	public boolean close(){
-		viewer.removeSelectionChangedListener(null);
+		viewer.removeSelectionChangedListener(ptsl);
 		return super.close();
 	}
 
