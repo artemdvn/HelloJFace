@@ -3,7 +3,11 @@ package com.eclipsercp.swtjface.actions;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.widgets.MessageBox;
+
+import com.eclipsercp.swtjface.services.MessageBoxService;
 
 public class ActionHelpAbout extends Action {
 
@@ -27,7 +31,10 @@ public class ActionHelpAbout extends Action {
 
 	@Override
 	public void run() {
-		
+		MessageBox dia = MessageBoxService.getInstance().getMessageBox(SWT.ICON_INFORMATION | SWT.OK, "About",
+				"JFace Demo project, 2017");
+		dia.open();
+		return;		
 	}	
 
 }
