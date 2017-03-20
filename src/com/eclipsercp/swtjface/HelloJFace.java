@@ -110,10 +110,7 @@ public class HelloJFace extends ApplicationWindow {
 		gridData.horizontalAlignment = GridData.FILL;
 		viewer.getControl().setLayoutData(gridData);
 
-		actionFileOpen.setViewer(viewer);
-		actionFileSave.setViewer(viewer);
-		ptsl.setViewer(viewer);
-		PersonService.getInstance().setViewer(viewer);
+		setViewerToActions();
 
 	}
 
@@ -285,13 +282,24 @@ public class HelloJFace extends ApplicationWindow {
 		return createAndFillMenu();
 
 	}
+	
+	private void setViewerToActions() {
+		actionFileOpen.setViewer(viewer);
+		actionFileSave.setViewer(viewer);
+		actionEditCopy.setViewer(viewer);
+		ptsl.setViewer(viewer);
+		PersonService.getInstance().setViewer(viewer);
+	}
 
 	private void createActions() {
 		actionFileOpen = new ActionFileOpen();
 		actionFileSave = new ActionFileSave();
 		actionEditCopy = new ActionEditCopy();
+		actionEditCopy.setEnabled(false);
 		actionEditPaste = new ActionEditPaste();
+		actionEditPaste.setEnabled(false);
 		actionEditDelete = new ActionEditDelete();
+		actionEditDelete.setEnabled(false);
 		actionHelpAbout = new ActionHelpAbout();
 	}
 

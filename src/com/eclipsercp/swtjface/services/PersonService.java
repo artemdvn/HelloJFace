@@ -14,6 +14,7 @@ public class PersonService {
 	private static PersonService instance;
 	private List<Person> personList = new ArrayList<Person>();
 	private TableViewer viewer;
+	private Person copiedPerson;
 
 	public static synchronized PersonService getInstance() {
 		if (instance == null) {
@@ -37,6 +38,14 @@ public class PersonService {
 	public void setPersonList(List<Person> personList) {
 		this.personList = personList;
 	}
+	
+	public Person getCopiedPerson() {
+		return copiedPerson;
+	}
+
+	public void setCopiedPerson(Person copiedPerson) {
+		this.copiedPerson = copiedPerson;
+	}
 
 	public void addPerson(String nameString, String groupString, Boolean swtDone) {
 		if (nameString.length() == 0) {
@@ -56,9 +65,14 @@ public class PersonService {
 
 		Person newPerson = new Person(nameString, group, swtDone);
 		personList.add(newPerson);
-
+		
+		viewer.setInput(personList);
 		viewer.refresh();
 
+	}
+	
+	public void addPerson(Person newPerson) {
+		addPerson(newPerson.getName(), newPerson.getGroup().toString(), newPerson.isSwtDone());
 	}
 	
 	public void savePerson(String nameString, String groupString, Boolean swtDone) {
@@ -97,6 +111,7 @@ public class PersonService {
 		currentPerson.setGroup(group);
 		currentPerson.setSwtDone(swtDone);
 
+		viewer.setInput(personList);
 		viewer.refresh();
 
 	}
@@ -115,6 +130,7 @@ public class PersonService {
 		int response = messageBox.open();
 		if (response == SWT.YES) {
 			personList.remove(viewer.getTable().getSelectionIndex());
+			viewer.setInput(personList);
 			viewer.refresh();
 		}
 

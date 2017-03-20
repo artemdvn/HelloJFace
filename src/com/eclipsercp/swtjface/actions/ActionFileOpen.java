@@ -14,6 +14,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
 import com.eclipsercp.swtjface.Person;
+import com.eclipsercp.swtjface.services.PersonService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -59,6 +60,7 @@ public class ActionFileOpen extends Action {
 			}.getType();
 			List<Person> personList = (List<Person>) viewer.getInput();
 			personList = gson.fromJson(file, listOfTestObject);
+			PersonService.getInstance().setPersonList(personList);
 			viewer.setInput(personList);
 			viewer.refresh();
 		} catch (IOException e) {

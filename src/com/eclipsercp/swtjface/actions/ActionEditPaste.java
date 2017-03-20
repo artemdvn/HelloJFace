@@ -5,6 +5,9 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.graphics.ImageData;
 
+import com.eclipsercp.swtjface.Person;
+import com.eclipsercp.swtjface.services.PersonService;
+
 public class ActionEditPaste extends Action {
 
 	private TableViewer viewer;
@@ -27,6 +30,10 @@ public class ActionEditPaste extends Action {
 
 	@Override
 	public void run() {
+		Person copiedPerson = PersonService.getInstance().getCopiedPerson();
+		if (copiedPerson != null) {
+			PersonService.getInstance().addPerson(copiedPerson);
+		}
 		
 	}	
 

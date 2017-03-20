@@ -5,12 +5,14 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.graphics.ImageData;
 
+import com.eclipsercp.swtjface.services.PersonService;
+
 public class ActionEditDelete extends Action {
 
 	private TableViewer viewer;
 
 	public ActionEditDelete() {
-		super("&Delete@Del", AS_PUSH_BUTTON);
+		super("&Delete@Delete", AS_PUSH_BUTTON);
 		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/delete.jpg");
 		ImageData imgData = id.getImageData();
 		imgData = imgData.scaledTo(32, 32);
@@ -27,7 +29,7 @@ public class ActionEditDelete extends Action {
 
 	@Override
 	public void run() {
-		
+		PersonService.getInstance().deletePerson();
 	}	
 
 }

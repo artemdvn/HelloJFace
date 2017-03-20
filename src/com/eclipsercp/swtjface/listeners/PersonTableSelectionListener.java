@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Text;
 
 import com.eclipsercp.swtjface.Person;
+import com.eclipsercp.swtjface.services.PersonService;
 
 public class PersonTableSelectionListener implements ISelectionChangedListener {
 
@@ -67,15 +68,7 @@ public class PersonTableSelectionListener implements ISelectionChangedListener {
 		ISelection sel = event.getSelection();
 		if (sel.isEmpty() || !(sel instanceof IStructuredSelection)) {
 			// disable some actions
-			for (IContributionItem tbItem : tbm.getItems()) {
-				if ((tbItem instanceof ActionContributionItem)) {
-					IAction act = ((ActionContributionItem) tbItem).getAction();
-					if (act.getText().startsWith("&Copy") || act.getText().startsWith("&Paste")
-							|| act.getText().startsWith("&Delete")) {
-						act.setEnabled(false);
-					}
-				}
-			}
+			disableActions();
 			return;
 		}
 		Person selectedPerson = (Person) ((IStructuredSelection) sel).getFirstElement();
@@ -84,13 +77,35 @@ public class PersonTableSelectionListener implements ISelectionChangedListener {
 		swtDoneBtn.setSelection(selectedPerson.isSwtDone());
 
 		// enable all actions
+		enableActions();
+
+	}
+
+	private void disableActions() {
 		for (IContributionItem tbItem : tbm.getItems()) {
 			if ((tbItem instanceof ActionContributionItem)) {
 				IAction act = ((ActionContributionItem) tbItem).getAction();
-				act.setEnabled(true);
+				if (act.getText().startsWith("&Copy") || act.getText().startsWith("&Paste")
+						|| act.getText().startsWith("&Delete")) {
+					act.setEnabled(false);
+				}
 			}
 		}
+	}
 
+	private void enableActions() {
+		for (IContributionItem tbItem : tbm.getItems()) {
+			if ((tbItem instanceof ActionContributionItem)) {
+				IAction act = ((ActionContributionItem) tbItem).getAction();
+				if (act.getText().startsWith("&Paste")){
+					if (PersonService.getInstance().getCopiedPerson() != null){
+						act.setEnabled(true);
+					}
+				} else{
+					act.setEnabled(true);
+				}
+			}
+		}
 	}
 
 }
