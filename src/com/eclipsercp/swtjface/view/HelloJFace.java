@@ -1,8 +1,5 @@
 package com.eclipsercp.swtjface.view;
 
-import java.lang.ref.WeakReference;
-import java.util.WeakHashMap;
-
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -16,9 +13,6 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -26,48 +20,58 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Widget;
 
 import com.eclipsercp.swtjface.controller.PersonController;
 import com.eclipsercp.swtjface.model.Person;
 import com.eclipsercp.swtjface.services.ImageDescriptorService;
-import com.eclipsercp.swtjface.services.MessageBoxService;
 import com.eclipsercp.swtjface.view.actions.EditCopyAction;
 import com.eclipsercp.swtjface.view.actions.EditDeleteAction;
 import com.eclipsercp.swtjface.view.actions.EditPasteAction;
 import com.eclipsercp.swtjface.view.actions.FileOpenAction;
 import com.eclipsercp.swtjface.view.actions.FileSaveAction;
 import com.eclipsercp.swtjface.view.actions.HelpAboutAction;
+import com.eclipsercp.swtjface.view.listeners.AddPersonSelectionAdapter;
+import com.eclipsercp.swtjface.view.listeners.CancelAppSelectionAdapter;
+import com.eclipsercp.swtjface.view.listeners.DeletePersonSelectionAdapter;
+import com.eclipsercp.swtjface.view.listeners.PersonGroupVerifyListener;
 import com.eclipsercp.swtjface.view.listeners.PersonTableSelectionListener;
-import com.eclipsercp.swtjface.view.listeners.WeakPersonGroupChangeListener;
+import com.eclipsercp.swtjface.view.listeners.SavePersonSelectionAdapter;
 
 public class HelloJFace extends ApplicationWindow {
 
+	// UI fields
 	private TableViewer viewer;
 	private Text personName;
 	private Text personGroup;
 	private Button swtDoneBtn;
+	private Button newBtn;
+	private Button saveBtn;
+	private Button deleteBtn;
+	private Button cancelBtn;
 
+	// actions
 	private FileOpenAction actionFileOpen;
 	private FileSaveAction actionFileSave;
 	private EditCopyAction actionEditCopy;
 	private EditPasteAction actionEditPaste;
 	private EditDeleteAction actionEditDelete;
 	private HelpAboutAction actionHelpAbout;
-	private PersonTableSelectionListener ptsl = new PersonTableSelectionListener();
+
+	// listeners
+	private PersonTableSelectionListener personTableSelectionListener = new PersonTableSelectionListener();
+	private PersonGroupVerifyListener personGroupVerifyListener = new PersonGroupVerifyListener();
+	private AddPersonSelectionAdapter addPersonSelectionAdapter = new AddPersonSelectionAdapter();
+	private SavePersonSelectionAdapter savePersonSelectionAdapter = new SavePersonSelectionAdapter();
+	private DeletePersonSelectionAdapter deletePersonSelectionAdapter = new DeletePersonSelectionAdapter();
+	private CancelAppSelectionAdapter cancelAppSelectionAdapter = new CancelAppSelectionAdapter();
 
 	// images for "SWT done" column assumes that we have these two icons in the
 	private final ImageDescriptor CHECKED = getImageDescriptor("checked.gif");
 	private final ImageDescriptor UNCHECKED = getImageDescriptor("unchecked.gif");
-	
-	private WeakHashMap<Widget, Listener> changeListeners = new WeakHashMap<Widget, Listener>();
 
 	/**
 	 * Constructs a new instance of this class.
@@ -104,7 +108,7 @@ public class HelloJFace extends ApplicationWindow {
 		// make lines and header visible
 		viewer.getTable().setHeaderVisible(true);
 		viewer.getTable().setLinesVisible(true);
-		viewer.addSelectionChangedListener(ptsl);
+		viewer.addSelectionChangedListener(personTableSelectionListener);
 
 		viewer.setContentProvider(new ArrayContentProvider());
 		viewer.setInput(PersonController.getInstance().getPersonList());
@@ -143,16 +147,11 @@ public class HelloJFace extends ApplicationWindow {
 		labelGroupName.setText("Group #:");
 
 		personGroup = new Text(personInfoGroup, SWT.BORDER | SWT.RIGHT);
-		//SelectionAdapter btnSelectionAdapter = new SelectionAdapter() {
-		//	public void widgetSelected(SelectionEvent e) {
-		//		checkDigitalInput(e);
-		//	}
-		//};
-		//personGroup.addListener(SWT.Verify, event -> checkDigitalInput(event));
-		personGroup.addListener(SWT.Verify,
-				new WeakPersonGroupChangeListener(event -> checkDigitalInput(event), personGroup));
-		//changeListeners.put(personGroup, event -> checkDigitalInput(event));
-		
+		personGroup.addVerifyListener(personGroupVerifyListener);
+		// personGroup.addListener(SWT.Verify,
+		// new WeakPersonGroupChangeListener(event -> checkDigitalInput(event),
+		// personGroup));
+
 		Label labelSwtDone = new Label(personInfoGroup, SWT.NONE);
 		labelSwtDone.setText("SWT task done");
 
@@ -165,43 +164,45 @@ public class HelloJFace extends ApplicationWindow {
 		personButtons.setLayoutData(gridDataFill);
 
 		// button 'New'
-		Button newBtn = new Button(personButtons, SWT.PUSH);
+		newBtn = new Button(personButtons, SWT.PUSH);
 		newBtn.setText("New");
-		newBtn.addListener(SWT.Selection, event -> PersonController.getInstance().addPerson(personName.getText(),
-				personGroup.getText(), swtDoneBtn.getSelection()));
+		newBtn.addSelectionListener(addPersonSelectionAdapter);
 
 		// button 'Save'
-		Button saveBtn = new Button(personButtons, SWT.PUSH);
+		saveBtn = new Button(personButtons, SWT.PUSH);
 		saveBtn.setText("Save");
-		saveBtn.addListener(SWT.Selection, event -> PersonController.getInstance().savePerson(personName.getText(),
-				personGroup.getText(), swtDoneBtn.getSelection()));
+		saveBtn.addSelectionListener(savePersonSelectionAdapter);
 
 		// button 'Delete'
-		Button deleteBtn = new Button(personButtons, SWT.PUSH);
+		deleteBtn = new Button(personButtons, SWT.PUSH);
 		deleteBtn.setText("Delete");
-		deleteBtn.addListener(SWT.Selection, event -> PersonController.getInstance().deletePerson());
+		deleteBtn.addSelectionListener(deletePersonSelectionAdapter);
 
 		// button 'Cancel'
-		Button cancelBtn = new Button(personButtons, SWT.PUSH);
+		cancelBtn = new Button(personButtons, SWT.PUSH);
 		cancelBtn.setText("Cancel");
-		cancelBtn.addListener(SWT.Selection, event -> cancelApp());
+		cancelBtn.addSelectionListener(cancelAppSelectionAdapter);
 
 		personInfoGroup.pack();
 
-		ptsl.setPersonName(personName);
-		ptsl.setPersonGroup(personGroup);
-		ptsl.setSwtDoneBtn(swtDoneBtn);
+		setListenerFields();
 
 	}
 
-	private void cancelApp() {
-		MessageBox messageBox = MessageBoxService.getInstance().getMessageBox(SWT.ICON_QUESTION | SWT.YES | SWT.NO,
-				"Exiting Application", "Do you really want to exit?");
-		int response = messageBox.open();
-		if (response == SWT.YES) {
-			close();
-		}
+	private void setListenerFields() {
+		personTableSelectionListener.setPersonName(personName);
+		personTableSelectionListener.setPersonGroup(personGroup);
+		personTableSelectionListener.setSwtDoneBtn(swtDoneBtn);
 
+		addPersonSelectionAdapter.setPersonName(personName);
+		addPersonSelectionAdapter.setPersonGroup(personGroup);
+		addPersonSelectionAdapter.setSwtDoneBtn(swtDoneBtn);
+
+		savePersonSelectionAdapter.setPersonName(personName);
+		savePersonSelectionAdapter.setPersonGroup(personGroup);
+		savePersonSelectionAdapter.setSwtDoneBtn(swtDoneBtn);
+
+		cancelAppSelectionAdapter.setAppWindow(this);
 	}
 
 	// create the columns for the table
@@ -268,17 +269,6 @@ public class HelloJFace extends ApplicationWindow {
 		return viewerColumn;
 	}
 
-	private void checkDigitalInput(Event event) {
-		String string = event.text;
-		char[] chars = new char[string.length()];
-		string.getChars(0, chars.length, chars, 0);
-		for (int i = 0; i < chars.length; i++) {
-			if (!('0' <= chars[i] && chars[i] <= '9')) {
-				event.doit = false;
-			}
-		}
-	}
-	
 	@Override
 	protected MenuManager createMenuManager() {
 
@@ -286,36 +276,42 @@ public class HelloJFace extends ApplicationWindow {
 		return createAndFillMenu();
 
 	}
-	
+
 	private void setViewerToActions() {
 		actionFileOpen.setViewer(viewer);
 		actionFileSave.setViewer(viewer);
 		actionEditCopy.setViewer(viewer);
-		ptsl.setViewer(viewer);
+		personTableSelectionListener.setViewer(viewer);
 		PersonController.getInstance().setViewer(viewer);
 	}
 
 	private void createActions() {
 		actionFileOpen = new FileOpenAction();
-		actionFileOpen.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/open.jpg"));
-		
+		actionFileOpen
+				.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/open.jpg"));
+
 		actionFileSave = new FileSaveAction();
-		actionFileSave.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/save.jpg"));
-		
+		actionFileSave
+				.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/save.jpg"));
+
 		actionEditCopy = new EditCopyAction();
-		actionEditCopy.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/copy.jpg"));
+		actionEditCopy
+				.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/copy.jpg"));
 		actionEditCopy.setEnabled(false);
-		
+
 		actionEditPaste = new EditPasteAction();
-		actionEditPaste.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/paste.jpg"));
+		actionEditPaste
+				.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/paste.jpg"));
 		actionEditPaste.setEnabled(false);
-		
+
 		actionEditDelete = new EditDeleteAction();
-		actionEditDelete.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/delete.jpg"));
+		actionEditDelete
+				.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/delete.jpg"));
 		actionEditDelete.setEnabled(false);
-		
+
 		actionHelpAbout = new HelpAboutAction();
-		actionHelpAbout.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/about.jpg"));
+		actionHelpAbout
+				.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/about.jpg"));
 	}
 
 	private MenuManager createAndFillMenu() {
@@ -348,20 +344,29 @@ public class HelloJFace extends ApplicationWindow {
 		tool_bar_manager.add(actionEditCopy);
 		tool_bar_manager.add(actionEditPaste);
 		tool_bar_manager.add(actionEditDelete);
-		
-		ptsl.setToolBarManager(tool_bar_manager);
-		
+
+		personTableSelectionListener.setToolBarManager(tool_bar_manager);
+
 		return tool_bar_manager;
 	}
 
 	private static ImageDescriptor getImageDescriptor(String file) {
 		return ImageDescriptor.createFromFile(null, "resources/" + file);
 	}
-	
+
 	@Override
-	public boolean close(){
-		viewer.removeSelectionChangedListener(ptsl);
+	public boolean close() {
+		removeListeners();
 		return super.close();
+	}
+
+	private void removeListeners() {
+		viewer.removeSelectionChangedListener(personTableSelectionListener);
+		personGroup.removeVerifyListener(personGroupVerifyListener);
+		newBtn.removeSelectionListener(addPersonSelectionAdapter);
+		saveBtn.removeSelectionListener(savePersonSelectionAdapter);
+		deleteBtn.removeSelectionListener(deletePersonSelectionAdapter);
+		cancelBtn.removeSelectionListener(cancelAppSelectionAdapter);
 	}
 
 	public static void main(String[] args) {
