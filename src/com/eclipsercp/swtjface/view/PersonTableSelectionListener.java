@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.listeners;
+package com.eclipsercp.swtjface.view;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -12,8 +12,8 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Text;
 
-import com.eclipsercp.swtjface.Person;
-import com.eclipsercp.swtjface.services.PersonService;
+import com.eclipsercp.swtjface.controller.PersonController;
+import com.eclipsercp.swtjface.model.Person;
 
 public class PersonTableSelectionListener implements ISelectionChangedListener {
 
@@ -98,7 +98,7 @@ public class PersonTableSelectionListener implements ISelectionChangedListener {
 			if ((tbItem instanceof ActionContributionItem)) {
 				IAction act = ((ActionContributionItem) tbItem).getAction();
 				if (act.getText().startsWith("&Paste")){
-					if (PersonService.getInstance().getCopiedPerson() != null){
+					if (PersonController.getInstance().getCopiedPerson() != null){
 						act.setEnabled(true);
 					}
 				} else{

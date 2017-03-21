@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface;
+package com.eclipsercp.swtjface.model;
 
 public class Person {
 

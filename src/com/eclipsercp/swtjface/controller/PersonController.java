@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.services;
+package com.eclipsercp.swtjface.controller;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,18 +7,18 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 
-import com.eclipsercp.swtjface.Person;
+import com.eclipsercp.swtjface.model.Person;
 
-public class PersonService {
+public class PersonController {
 	
-	private static PersonService instance;
+	private static PersonController instance;
 	private List<Person> personList = new ArrayList<Person>();
 	private TableViewer viewer;
 	private Person copiedPerson;
 
-	public static synchronized PersonService getInstance() {
+	public static synchronized PersonController getInstance() {
 		if (instance == null) {
-			instance = new PersonService();
+			instance = new PersonController();
 		}
 		return instance;
 	}

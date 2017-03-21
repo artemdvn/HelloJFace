@@ -1,21 +1,19 @@
-package com.eclipsercp.swtjface.actions;
+package com.eclipsercp.swtjface.view;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.ImageData;
-import org.eclipse.swt.widgets.MessageBox;
 
-import com.eclipsercp.swtjface.services.MessageBoxService;
+import com.eclipsercp.swtjface.controller.PersonController;
 
-public class ActionHelpAbout extends Action {
+public class ActionEditDelete extends Action {
 
 	private TableViewer viewer;
 
-	public ActionHelpAbout() {
-		super("&About@F1", AS_PUSH_BUTTON);
-		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/about.jpg");
+	public ActionEditDelete() {
+		super("&Delete@Delete", AS_PUSH_BUTTON);
+		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/delete.jpg");
 		ImageData imgData = id.getImageData();
 		imgData = imgData.scaledTo(32, 32);
 		setImageDescriptor(ImageDescriptor.createFromImageData(imgData));
@@ -31,10 +29,7 @@ public class ActionHelpAbout extends Action {
 
 	@Override
 	public void run() {
-		MessageBox dia = MessageBoxService.getInstance().getMessageBox(SWT.ICON_INFORMATION | SWT.OK, "About",
-				"JFace Demo project, 2017");
-		dia.open();
-		return;		
+		PersonController.getInstance().deletePerson();
 	}	
 
 }

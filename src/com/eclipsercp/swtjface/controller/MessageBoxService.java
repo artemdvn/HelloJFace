@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.services;
+package com.eclipsercp.swtjface.controller;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.MessageBox;

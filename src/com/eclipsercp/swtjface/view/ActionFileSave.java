@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.actions;
+package com.eclipsercp.swtjface.view;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
-import com.eclipsercp.swtjface.Person;
+import com.eclipsercp.swtjface.model.Person;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 

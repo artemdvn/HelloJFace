@@ -1,12 +1,12 @@
-package com.eclipsercp.swtjface.actions;
+package com.eclipsercp.swtjface.view;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.graphics.ImageData;
 
-import com.eclipsercp.swtjface.Person;
-import com.eclipsercp.swtjface.services.PersonService;
+import com.eclipsercp.swtjface.controller.PersonController;
+import com.eclipsercp.swtjface.model.Person;
 
 public class ActionEditPaste extends Action {
 
@@ -30,9 +30,9 @@ public class ActionEditPaste extends Action {
 
 	@Override
 	public void run() {
-		Person copiedPerson = PersonService.getInstance().getCopiedPerson();
+		Person copiedPerson = PersonController.getInstance().getCopiedPerson();
 		if (copiedPerson != null) {
-			PersonService.getInstance().addPerson(copiedPerson);
+			PersonController.getInstance().addPerson(copiedPerson);
 		}
 		
 	}	

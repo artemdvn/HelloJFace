@@ -27,15 +27,16 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
-import com.eclipsercp.swtjface.actions.ActionEditCopy;
-import com.eclipsercp.swtjface.actions.ActionEditDelete;
-import com.eclipsercp.swtjface.actions.ActionEditPaste;
-import com.eclipsercp.swtjface.actions.ActionFileOpen;
-import com.eclipsercp.swtjface.actions.ActionFileSave;
-import com.eclipsercp.swtjface.actions.ActionHelpAbout;
-import com.eclipsercp.swtjface.listeners.PersonTableSelectionListener;
-import com.eclipsercp.swtjface.services.MessageBoxService;
-import com.eclipsercp.swtjface.services.PersonService;
+import com.eclipsercp.swtjface.controller.MessageBoxService;
+import com.eclipsercp.swtjface.controller.PersonController;
+import com.eclipsercp.swtjface.model.Person;
+import com.eclipsercp.swtjface.view.ActionEditCopy;
+import com.eclipsercp.swtjface.view.ActionEditDelete;
+import com.eclipsercp.swtjface.view.ActionEditPaste;
+import com.eclipsercp.swtjface.view.ActionFileOpen;
+import com.eclipsercp.swtjface.view.ActionFileSave;
+import com.eclipsercp.swtjface.view.ActionHelpAbout;
+import com.eclipsercp.swtjface.view.PersonTableSelectionListener;
 
 public class HelloJFace extends ApplicationWindow {
 
@@ -100,7 +101,7 @@ public class HelloJFace extends ApplicationWindow {
 		viewer.addSelectionChangedListener(ptsl);
 
 		viewer.setContentProvider(new ArrayContentProvider());
-		viewer.setInput(PersonService.getInstance().getPersonList());
+		viewer.setInput(PersonController.getInstance().getPersonList());
 
 		// define layout for the viewer
 		GridData gridData = new GridData();
@@ -158,19 +159,19 @@ public class HelloJFace extends ApplicationWindow {
 		// button 'New'
 		Button newBtn = new Button(personButtons, SWT.PUSH);
 		newBtn.setText("New");
-		newBtn.addListener(SWT.Selection, event -> PersonService.getInstance().addPerson(personName.getText(),
+		newBtn.addListener(SWT.Selection, event -> PersonController.getInstance().addPerson(personName.getText(),
 				personGroup.getText(), swtDoneBtn.getSelection()));
 
 		// button 'Save'
 		Button saveBtn = new Button(personButtons, SWT.PUSH);
 		saveBtn.setText("Save");
-		saveBtn.addListener(SWT.Selection, event -> PersonService.getInstance().savePerson(personName.getText(),
+		saveBtn.addListener(SWT.Selection, event -> PersonController.getInstance().savePerson(personName.getText(),
 				personGroup.getText(), swtDoneBtn.getSelection()));
 
 		// button 'Delete'
 		Button deleteBtn = new Button(personButtons, SWT.PUSH);
 		deleteBtn.setText("Delete");
-		deleteBtn.addListener(SWT.Selection, event -> PersonService.getInstance().deletePerson());
+		deleteBtn.addListener(SWT.Selection, event -> PersonController.getInstance().deletePerson());
 
 		// button 'Cancel'
 		Button cancelBtn = new Button(personButtons, SWT.PUSH);
@@ -288,7 +289,7 @@ public class HelloJFace extends ApplicationWindow {
 		actionFileSave.setViewer(viewer);
 		actionEditCopy.setViewer(viewer);
 		ptsl.setViewer(viewer);
-		PersonService.getInstance().setViewer(viewer);
+		PersonController.getInstance().setViewer(viewer);
 	}
 
 	private void createActions() {

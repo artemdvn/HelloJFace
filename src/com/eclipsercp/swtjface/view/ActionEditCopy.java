@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.actions;
+package com.eclipsercp.swtjface.view;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -7,8 +7,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.graphics.ImageData;
 
-import com.eclipsercp.swtjface.Person;
-import com.eclipsercp.swtjface.services.PersonService;
+import com.eclipsercp.swtjface.controller.PersonController;
+import com.eclipsercp.swtjface.model.Person;
 
 public class ActionEditCopy extends Action {
 
@@ -34,7 +34,7 @@ public class ActionEditCopy extends Action {
 	public void run() {
 		ISelection sel = viewer.getSelection();
 		Person selectedPerson = (Person) ((IStructuredSelection) sel).getFirstElement();
-		PersonService.getInstance().setCopiedPerson(selectedPerson);
+		PersonController.getInstance().setCopiedPerson(selectedPerson);
 		
 	}	
 
