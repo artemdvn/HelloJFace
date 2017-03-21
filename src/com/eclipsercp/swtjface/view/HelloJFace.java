@@ -1,4 +1,7 @@
-package com.eclipsercp.swtjface;
+package com.eclipsercp.swtjface.view;
+
+import java.lang.ref.WeakReference;
+import java.util.WeakHashMap;
 
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.ToolBarManager;
@@ -13,6 +16,9 @@ import org.eclipse.jface.viewers.TableViewerColumn;
 import org.eclipse.jface.window.ApplicationWindow;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -23,20 +29,22 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
 
-import com.eclipsercp.swtjface.controller.MessageBoxService;
 import com.eclipsercp.swtjface.controller.PersonController;
 import com.eclipsercp.swtjface.model.Person;
-import com.eclipsercp.swtjface.view.ActionEditCopy;
-import com.eclipsercp.swtjface.view.ActionEditDelete;
-import com.eclipsercp.swtjface.view.ActionEditPaste;
-import com.eclipsercp.swtjface.view.ActionFileOpen;
-import com.eclipsercp.swtjface.view.ActionFileSave;
-import com.eclipsercp.swtjface.view.ActionHelpAbout;
-import com.eclipsercp.swtjface.view.PersonTableSelectionListener;
+import com.eclipsercp.swtjface.services.MessageBoxService;
+import com.eclipsercp.swtjface.view.actions.ActionEditCopy;
+import com.eclipsercp.swtjface.view.actions.ActionEditDelete;
+import com.eclipsercp.swtjface.view.actions.ActionEditPaste;
+import com.eclipsercp.swtjface.view.actions.ActionFileOpen;
+import com.eclipsercp.swtjface.view.actions.ActionFileSave;
+import com.eclipsercp.swtjface.view.actions.ActionHelpAbout;
+import com.eclipsercp.swtjface.view.listeners.PersonTableSelectionListener;
 
 public class HelloJFace extends ApplicationWindow {
 
@@ -56,6 +64,8 @@ public class HelloJFace extends ApplicationWindow {
 	// images for "SWT done" column assumes that we have these two icons in the
 	private final ImageDescriptor CHECKED = getImageDescriptor("checked.gif");
 	private final ImageDescriptor UNCHECKED = getImageDescriptor("unchecked.gif");
+	
+	private WeakHashMap<Widget, Listener> changeListeners = new WeakHashMap<Widget, Listener>();
 
 	/**
 	 * Constructs a new instance of this class.
@@ -85,12 +95,6 @@ public class HelloJFace extends ApplicationWindow {
 		return parent;
 	}
 
-	/**
-	 * Constructs a person list table.
-	 * 
-	 * @param parent
-	 *            a widget which will be the parent of the creating elements
-	 */
 	private void createTableViewer(Composite parent) {
 		viewer = new TableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.FULL_SELECTION | SWT.BORDER);
 		createColumns(parent, viewer);
@@ -115,12 +119,6 @@ public class HelloJFace extends ApplicationWindow {
 
 	}
 
-	/**
-	 * Constructs a "Person info" group with fields and buttons.
-	 * 
-	 * @param parent
-	 *            a widget which will be the parent of the creating elements
-	 */
 	private void createGroupOfFieldsAndButtons(Composite parent) {
 		GridData gridDataResult = new GridData();
 		gridDataResult.horizontalAlignment = GridData.FILL;
@@ -143,8 +141,15 @@ public class HelloJFace extends ApplicationWindow {
 		labelGroupName.setText("Group #:");
 
 		personGroup = new Text(personInfoGroup, SWT.BORDER | SWT.RIGHT);
-		personGroup.addListener(SWT.Verify, event -> checkDigitalInput(event));
-
+		//SelectionAdapter btnSelectionAdapter = new SelectionAdapter() {
+		//	public void widgetSelected(SelectionEvent e) {
+		//		checkDigitalInput(e);
+		//	}
+		//};
+		//personGroup.addSelectionListener((SelectionListener) new WeakReference(btnSelectionAdapter));
+		//addListener(SWT.Verify, event -> checkDigitalInput(event));
+		changeListeners.put(personGroup, event -> checkDigitalInput(event));
+		
 		Label labelSwtDone = new Label(personInfoGroup, SWT.NONE);
 		labelSwtDone.setText("SWT task done");
 
@@ -260,13 +265,13 @@ public class HelloJFace extends ApplicationWindow {
 		return viewerColumn;
 	}
 
-	private void checkDigitalInput(Event e) {
-		String string = e.text;
+	private void checkDigitalInput(Event event) {
+		String string = event.text;
 		char[] chars = new char[string.length()];
 		string.getChars(0, chars.length, chars, 0);
 		for (int i = 0; i < chars.length; i++) {
 			if (!('0' <= chars[i] && chars[i] <= '9')) {
-				e.doit = false;
+				event.doit = false;
 			}
 		}
 	}

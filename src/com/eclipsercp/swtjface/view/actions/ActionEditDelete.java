@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.view;
+package com.eclipsercp.swtjface.view.actions;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -7,10 +7,16 @@ import org.eclipse.swt.graphics.ImageData;
 
 import com.eclipsercp.swtjface.controller.PersonController;
 
+/**
+ * An action which is notified when a "Edit - Delete" menu item is selected.
+ */
 public class ActionEditDelete extends Action {
 
 	private TableViewer viewer;
 
+	/**
+	 * Constructs a new action for "Edit - Delete" menu item.
+	 */
 	public ActionEditDelete() {
 		super("&Delete@Delete", AS_PUSH_BUTTON);
 		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/delete.jpg");

@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.view;
+package com.eclipsercp.swtjface.view.actions;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,10 +18,16 @@ import com.eclipsercp.swtjface.model.Person;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+/**
+ * An action which is notified when a "File - Open" menu item is selected.
+ */
 public class ActionFileOpen extends Action {
 
 	private TableViewer viewer;
 
+	/**
+	 * Constructs a new action for "File - Open" menu item.
+	 */
 	public ActionFileOpen() {
 		super("&Open@Ctrl+O", AS_PUSH_BUTTON);
 		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/open.jpg");

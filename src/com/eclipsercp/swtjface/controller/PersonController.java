@@ -8,7 +8,11 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.MessageBox;
 
 import com.eclipsercp.swtjface.model.Person;
+import com.eclipsercp.swtjface.services.MessageBoxService;
 
+/**
+ * A controller to perform CRUD operations with the list of persons.
+ */
 public class PersonController {
 	
 	private static PersonController instance;
@@ -16,6 +20,9 @@ public class PersonController {
 	private TableViewer viewer;
 	private Person copiedPerson;
 
+	/**
+	 * Constructs a new instance of this class or return existing instance if it have been already instantiated.
+	 */
 	public static synchronized PersonController getInstance() {
 		if (instance == null) {
 			instance = new PersonController();
@@ -47,6 +54,16 @@ public class PersonController {
 		this.copiedPerson = copiedPerson;
 	}
 
+	/**
+	 * Creates new person using its name, group and "SWT Done" parameter and adds it to the list of persons.
+	 * 
+	 * @param name
+	 *            the name of the new person
+	 * @param group
+	 *            the group of the new person
+	 * @param swtDone
+	 *            the "SWT Done" parameter of the new person
+	 */
 	public void addPerson(String nameString, String groupString, Boolean swtDone) {
 		if (nameString.length() == 0) {
 			MessageBox dia = MessageBoxService.getInstance().getMessageBox(SWT.ICON_INFORMATION | SWT.OK, "Empty name",
@@ -71,10 +88,26 @@ public class PersonController {
 
 	}
 	
+	/**
+	 * Adds existing person to the list of persons.
+	 * 
+	 * @param newPerson
+	 *           existing person reference
+	 */
 	public void addPerson(Person newPerson) {
 		addPerson(newPerson.getName(), newPerson.getGroup().toString(), newPerson.isSwtDone());
 	}
 	
+	/**
+	 * Rewrites existing person using new name, group and "SWT Done" parameter.
+	 * 
+	 * @param name
+	 *            the new name of the existing person
+	 * @param group
+	 *            the new group of the existing person
+	 * @param swtDone
+	 *            the new "SWT Done" parameter of the existing person
+	 */
 	public void savePerson(String nameString, String groupString, Boolean swtDone) {
 		
 		setPersonList(getPersonListFromViewer());
@@ -116,6 +149,10 @@ public class PersonController {
 
 	}
 	
+	/**
+	 * Deletes selected person from the list of persons.
+	 * 
+	 */
 	public void deletePerson() {
 
 		setPersonList(getPersonListFromViewer());

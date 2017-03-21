@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.view;
+package com.eclipsercp.swtjface.view.actions;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -8,7 +8,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -17,10 +16,16 @@ import com.eclipsercp.swtjface.model.Person;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+/**
+ * An action which is notified when a "File - Save" menu item is selected.
+ */
 public class ActionFileSave extends Action {
 
 	private TableViewer viewer;
 
+	/**
+	 * Constructs a new action for "File - Save" menu item.
+	 */
 	public ActionFileSave() {
 		super("&Save@Ctrl+S", AS_PUSH_BUTTON);
 		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/save.jpg");

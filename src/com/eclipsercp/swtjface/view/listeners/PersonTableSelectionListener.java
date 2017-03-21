@@ -1,4 +1,4 @@
-package com.eclipsercp.swtjface.view;
+package com.eclipsercp.swtjface.view.listeners;
 
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
@@ -15,6 +15,9 @@ import org.eclipse.swt.widgets.Text;
 import com.eclipsercp.swtjface.controller.PersonController;
 import com.eclipsercp.swtjface.model.Person;
 
+/**
+ * A listener which is notified when a table viewer's selection changes.
+ */
 public class PersonTableSelectionListener implements ISelectionChangedListener {
 
 	private TableViewer viewer;
