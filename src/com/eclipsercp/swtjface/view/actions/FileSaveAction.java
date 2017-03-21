@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
@@ -19,19 +17,15 @@ import com.google.gson.GsonBuilder;
 /**
  * An action which is notified when a "File - Save" menu item is selected.
  */
-public class ActionFileSave extends Action {
+public class FileSaveAction extends Action {
 
 	private TableViewer viewer;
 
 	/**
 	 * Constructs a new action for "File - Save" menu item.
 	 */
-	public ActionFileSave() {
+	public FileSaveAction() {
 		super("&Save@Ctrl+S", AS_PUSH_BUTTON);
-		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/save.jpg");
-		ImageData imgData = id.getImageData();
-		imgData = imgData.scaledTo(32, 32);
-		setImageDescriptor(ImageDescriptor.createFromImageData(imgData));
 	}
 
 	public TableViewer getViewer() {

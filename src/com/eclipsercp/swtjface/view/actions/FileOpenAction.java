@@ -6,10 +6,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
@@ -21,19 +19,15 @@ import com.google.gson.reflect.TypeToken;
 /**
  * An action which is notified when a "File - Open" menu item is selected.
  */
-public class ActionFileOpen extends Action {
+public class FileOpenAction extends Action {
 
 	private TableViewer viewer;
 
 	/**
 	 * Constructs a new action for "File - Open" menu item.
 	 */
-	public ActionFileOpen() {
+	public FileOpenAction() {
 		super("&Open@Ctrl+O", AS_PUSH_BUTTON);
-		ImageDescriptor id = ImageDescriptor.createFromFile(null, "resources/open.jpg");
-		ImageData imgData = id.getImageData();
-		imgData = imgData.scaledTo(32, 32);
-		setImageDescriptor(ImageDescriptor.createFromImageData(imgData));
 	}
 
 	public TableViewer getViewer() {

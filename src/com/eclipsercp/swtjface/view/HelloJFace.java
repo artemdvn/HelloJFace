@@ -37,14 +37,16 @@ import org.eclipse.swt.widgets.Widget;
 
 import com.eclipsercp.swtjface.controller.PersonController;
 import com.eclipsercp.swtjface.model.Person;
+import com.eclipsercp.swtjface.services.ImageDescriptorService;
 import com.eclipsercp.swtjface.services.MessageBoxService;
-import com.eclipsercp.swtjface.view.actions.ActionEditCopy;
-import com.eclipsercp.swtjface.view.actions.ActionEditDelete;
-import com.eclipsercp.swtjface.view.actions.ActionEditPaste;
-import com.eclipsercp.swtjface.view.actions.ActionFileOpen;
-import com.eclipsercp.swtjface.view.actions.ActionFileSave;
-import com.eclipsercp.swtjface.view.actions.ActionHelpAbout;
+import com.eclipsercp.swtjface.view.actions.EditCopyAction;
+import com.eclipsercp.swtjface.view.actions.EditDeleteAction;
+import com.eclipsercp.swtjface.view.actions.EditPasteAction;
+import com.eclipsercp.swtjface.view.actions.FileOpenAction;
+import com.eclipsercp.swtjface.view.actions.FileSaveAction;
+import com.eclipsercp.swtjface.view.actions.HelpAboutAction;
 import com.eclipsercp.swtjface.view.listeners.PersonTableSelectionListener;
+import com.eclipsercp.swtjface.view.listeners.WeakPersonGroupChangeListener;
 
 public class HelloJFace extends ApplicationWindow {
 
@@ -53,12 +55,12 @@ public class HelloJFace extends ApplicationWindow {
 	private Text personGroup;
 	private Button swtDoneBtn;
 
-	private ActionFileOpen actionFileOpen;
-	private ActionFileSave actionFileSave;
-	private ActionEditCopy actionEditCopy;
-	private ActionEditPaste actionEditPaste;
-	private ActionEditDelete actionEditDelete;
-	private ActionHelpAbout actionHelpAbout;
+	private FileOpenAction actionFileOpen;
+	private FileSaveAction actionFileSave;
+	private EditCopyAction actionEditCopy;
+	private EditPasteAction actionEditPaste;
+	private EditDeleteAction actionEditDelete;
+	private HelpAboutAction actionHelpAbout;
 	private PersonTableSelectionListener ptsl = new PersonTableSelectionListener();
 
 	// images for "SWT done" column assumes that we have these two icons in the
@@ -85,10 +87,10 @@ public class HelloJFace extends ApplicationWindow {
 
 		SashForm sf = new SashForm(parent, SWT.HORIZONTAL);
 
-		// list of persons
+		// list of persons table
 		createTableViewer(sf);
 
-		// person info
+		// "Person info" group
 		createGroupOfFieldsAndButtons(sf);
 
 		parent.pack();
@@ -146,9 +148,10 @@ public class HelloJFace extends ApplicationWindow {
 		//		checkDigitalInput(e);
 		//	}
 		//};
-		//personGroup.addSelectionListener((SelectionListener) new WeakReference(btnSelectionAdapter));
-		//addListener(SWT.Verify, event -> checkDigitalInput(event));
-		changeListeners.put(personGroup, event -> checkDigitalInput(event));
+		//personGroup.addListener(SWT.Verify, event -> checkDigitalInput(event));
+		personGroup.addListener(SWT.Verify,
+				new WeakPersonGroupChangeListener(event -> checkDigitalInput(event), personGroup));
+		//changeListeners.put(personGroup, event -> checkDigitalInput(event));
 		
 		Label labelSwtDone = new Label(personInfoGroup, SWT.NONE);
 		labelSwtDone.setText("SWT task done");
@@ -275,12 +278,7 @@ public class HelloJFace extends ApplicationWindow {
 			}
 		}
 	}
-	@Override
-	public boolean close(){
-		viewer.removeSelectionChangedListener(ptsl);
-		return super.close();
-	}
-
+	
 	@Override
 	protected MenuManager createMenuManager() {
 
@@ -298,15 +296,26 @@ public class HelloJFace extends ApplicationWindow {
 	}
 
 	private void createActions() {
-		actionFileOpen = new ActionFileOpen();
-		actionFileSave = new ActionFileSave();
-		actionEditCopy = new ActionEditCopy();
+		actionFileOpen = new FileOpenAction();
+		actionFileOpen.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/open.jpg"));
+		
+		actionFileSave = new FileSaveAction();
+		actionFileSave.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/save.jpg"));
+		
+		actionEditCopy = new EditCopyAction();
+		actionEditCopy.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/copy.jpg"));
 		actionEditCopy.setEnabled(false);
-		actionEditPaste = new ActionEditPaste();
+		
+		actionEditPaste = new EditPasteAction();
+		actionEditPaste.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/paste.jpg"));
 		actionEditPaste.setEnabled(false);
-		actionEditDelete = new ActionEditDelete();
+		
+		actionEditDelete = new EditDeleteAction();
+		actionEditDelete.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/delete.jpg"));
 		actionEditDelete.setEnabled(false);
-		actionHelpAbout = new ActionHelpAbout();
+		
+		actionHelpAbout = new HelpAboutAction();
+		actionHelpAbout.setImageDescriptor(ImageDescriptorService.getInstance().getImageDescriptor("resources/about.jpg"));
 	}
 
 	private MenuManager createAndFillMenu() {
@@ -347,6 +356,12 @@ public class HelloJFace extends ApplicationWindow {
 
 	private static ImageDescriptor getImageDescriptor(String file) {
 		return ImageDescriptor.createFromFile(null, "resources/" + file);
+	}
+	
+	@Override
+	public boolean close(){
+		viewer.removeSelectionChangedListener(ptsl);
+		return super.close();
 	}
 
 	public static void main(String[] args) {
